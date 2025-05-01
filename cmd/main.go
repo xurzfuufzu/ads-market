@@ -45,5 +45,5 @@ func main() {
 
 	routes.InitRoutes(app, companyHandler, influencerHandler, adHandler, adResponseHandler)
 
-	log.Fatal(app.Listen(":" + cfg.Server.Port))
+	log.Fatal(app.Listen(":" + "8080"))
 }
