@@ -16,12 +16,16 @@ func NewCompanyRepo(db *pgxpool.Pool) *CompanyRepo {
 	}
 }
 
-func (r *CompanyRepo) Create(ctx context.Context, company *company.Entity) error {
-	_, err := r.db.Exec(ctx, `
+func (r *CompanyRepo) Create(ctx context.Context, company *company.Entity) (string, error) {
+	var id string
+
+	err := r.db.QueryRow(ctx, `
 		INSERT INTO companies (id, name, email, password, phone, account_type)
 		VALUES ($1, $2, $3, $4, $5, $6)
-	`, company.ID, company.Name, company.Email, company.Password, company.Phone, company.AccountType)
-	return err
+		RETURNING id
+	`, company.ID, company.Name, company.Email, company.Password, company.Phone, company.AccountType).Scan(&id)
+
+	return id, err
 }
 
 func (r *CompanyRepo) GetByEmail(ctx context.Context, email string) (*company.Entity, error) {
@@ -35,6 +39,24 @@ func (r *CompanyRepo) GetByEmail(ctx context.Context, email string) (*company.En
 		return nil, err
 	}
 	return &company, nil
+}
+
+func (r *CompanyRepo) GetByID(ctx context.Context, id string) (*company.Entity, error) {
+	row := r.db.QueryRow(ctx, `
+		SELECT id, name, email, password, phone, description, account_type, created_at, updated_at
+		FROM companies
+		WHERE id = $1
+	`, id)
+
+	var c company.Entity
+	err := row.Scan(
+		&c.ID, &c.Name, &c.Email, &c.Password, &c.Phone, &c.Description, &c.AccountType, &c.CreatedAt, &c.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &c, nil
 }
 
 func (r *CompanyRepo) Update(ctx context.Context, company *company.Entity) error {

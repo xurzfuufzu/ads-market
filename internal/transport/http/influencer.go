@@ -27,7 +27,7 @@ func (h *InfluencerHandler) Register(c fiber.Ctx) error {
 		})
 	}
 
-	token, err := h.influencerService.Register(c.Context(), input)
+	influencerID, token, err := h.influencerService.Register(c.Context(), input)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -35,6 +35,7 @@ func (h *InfluencerHandler) Register(c fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"id":    influencerID,
 		"token": token,
 	})
 }
@@ -47,14 +48,44 @@ func (h *InfluencerHandler) Login(c fiber.Ctx) error {
 		})
 	}
 
-	token, err := h.influencerService.Login(c.Context(), input)
+	influencerID, token, err := h.influencerService.Login(c.Context(), input)
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"id":    influencerID,
 		"token": token,
 	})
+}
+
+func (h *InfluencerHandler) GetByID(c fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "id is required",
+		})
+	}
+
+	influencer, err := h.influencerService.GetByID(c.Context(), id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(influencer)
+}
+
+func (h *InfluencerHandler) GetAll(c fiber.Ctx) error {
+	influencers, err := h.influencerService.GetAllInfluencers(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(influencers)
 }

@@ -1,8 +1,8 @@
 package influencer
 
 import (
-	"Ads-marketplace/internal/domain"
 	"github.com/google/uuid"
+	"time"
 )
 
 type Entity struct {
@@ -11,8 +11,8 @@ type Entity struct {
 	Email       string
 	Password    string
 	Phone       string
-	Platforms   []domain.Platform
+	Platforms   []string
 	AccountType string
-	CreatedAt   string
-	UpdatedAt   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

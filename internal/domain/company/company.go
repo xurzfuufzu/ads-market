@@ -1,8 +1,8 @@
 package company
 
 import (
-	"database/sql"
 	"github.com/google/uuid"
+	"time"
 )
 
 type Entity struct {
@@ -11,8 +11,8 @@ type Entity struct {
 	Email       string
 	Password    string
 	Phone       string
-	Description sql.NullString
+	Description *string
 	AccountType string
-	CreatedAt   string
-	UpdatedAt   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

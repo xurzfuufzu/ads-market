@@ -8,6 +8,7 @@ import (
 	"Ads-marketplace/pkg/token"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 )
 
@@ -21,55 +22,66 @@ func NewInfluencerService(influencerRepo repository.Influencer) *InfluencerServi
 	}
 }
 
-func (s *InfluencerService) Register(ctx context.Context, input influencer.RegisterRequest) (string, error) {
+func (s *InfluencerService) Register(ctx context.Context, input influencer.RegisterRequest) (string, string, error) {
 	existingInfluencer, err := s.influencerRepo.GetByEmail(ctx, input.Email)
 	if err == nil && existingInfluencer != nil {
-		return "", influencer.ErrorEmailConflict
+		return "", "", influencer.ErrorEmailConflict
 	}
 
 	hashedPassword, err := hasher.Hash(input.Password)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	newInfluencer := &influencer.Entity{
-		ID:       uuid.New(),
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: hashedPassword,
-		Phone:    input.PhoneNumber,
-		//Platforms:   input.Platforms,
+		ID:          uuid.New(),
+		Name:        input.Name,
+		Email:       input.Email,
+		Password:    hashedPassword,
+		Phone:       input.PhoneNumber,
 		AccountType: "Influencer",
 	}
 
-	err = s.influencerRepo.Create(ctx, newInfluencer)
+	influencerID, err := s.influencerRepo.Create(ctx, newInfluencer)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	token, err := token.GenerateToken(newInfluencer.ID.String())
+	token, err := token.GenerateToken(influencerID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return token, nil
+	return influencerID, token, nil
 }
 
-func (s *InfluencerService) Login(ctx context.Context, input domain.LoginRequest) (string, error) {
+func (s *InfluencerService) Login(ctx context.Context, input domain.LoginRequest) (string, string, error) {
 	existingInfluencer, err := s.influencerRepo.GetByEmail(ctx, input.Email)
 	if err != nil || existingInfluencer == nil {
-		return "", errors.New("influencer not found")
+		return "", "", errors.New("influencer not found")
 	}
 
 	err = hasher.Compare(existingInfluencer.Password, input.Password)
 	if err != nil {
-		return "", errors.New("invalid password")
+		return "", "", errors.New("invalid password")
 	}
 
 	token, err := token.GenerateToken(existingInfluencer.ID.String())
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return token, nil
+	return existingInfluencer.ID.String(), token, nil
+}
+
+func (s *InfluencerService) GetByID(ctx context.Context, id string) (*influencer.Entity, error) {
+	return s.influencerRepo.GetByID(ctx, id)
+}
+
+func (s *InfluencerService) GetAllInfluencers(ctx context.Context) ([]*influencer.Entity, error) {
+	influencers, err := s.influencerRepo.GetAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all influencers: %v", err)
+	}
+	return influencers, nil
 }

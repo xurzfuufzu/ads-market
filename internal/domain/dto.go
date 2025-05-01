@@ -8,8 +8,3 @@ type LoginRequest struct {
 type AuthResponse struct {
 	token string `json:"token"`
 }
-
-type Platform struct {
-	Name      string `json:"name"`
-	Followers uint32 `json:"followers"`
-}

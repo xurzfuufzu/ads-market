@@ -1,11 +1,12 @@
 package ad
 
-import "Ads-marketplace/internal/domain"
-
 type CreateRequest struct {
-	CompanyName string  `json:"company_name"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
-	Platforms   []domain.Platform
+	Title       string   `json:"title"`
+	CompanyName string   `json:"company_name"`
+	Description *string  `json:"description"`
+	PriceFrom   uint32   `json:"priceFrom"`
+	PriceTo     uint32   `json:"priceTo"`
+	Platforms   []string `json:"platforms"`
+	Category    *string  `json:"category"`
+	City        *string  `json:"target_city"`
 }

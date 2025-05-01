@@ -27,7 +27,7 @@ func (h *CompanyHandler) Register(c fiber.Ctx) error {
 		})
 	}
 
-	token, err := h.companyService.Register(c.Context(), input)
+	id, token, err := h.companyService.Register(c.Context(), input)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -35,6 +35,7 @@ func (h *CompanyHandler) Register(c fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"id":    id,
 		"token": token,
 	})
 }
@@ -47,7 +48,7 @@ func (h *CompanyHandler) Login(c fiber.Ctx) error {
 		})
 	}
 
-	token, err := h.companyService.Login(c.Context(), input)
+	id, token, err := h.companyService.Login(c.Context(), input)
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
 			"error": err.Error(),
@@ -55,6 +56,25 @@ func (h *CompanyHandler) Login(c fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"id":    id,
 		"token": token,
 	})
+}
+
+func (h *CompanyHandler) GetByID(c fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "id is required",
+		})
+	}
+
+	company, err := h.companyService.GetByID(c.Context(), id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(company)
 }

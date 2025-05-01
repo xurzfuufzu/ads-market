@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"Ads-marketplace/internal/domain/influencer"
-	"Ads-marketplace/pkg/utils"
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -17,50 +16,88 @@ func NewInfluencerRepo(db *pgxpool.Pool) *InfluencerRepo {
 	}
 }
 
-func (r *InfluencerRepo) Create(ctx context.Context, influencer *influencer.Entity) error {
-	platformsJson, err := utils.SerializePlatforms(influencer.Platforms)
-	if err != nil {
-		return err
-	}
+func (r *InfluencerRepo) Create(ctx context.Context, influencer *influencer.Entity) (string, error) {
+	var id string
 
-	_, err = r.db.Exec(ctx, `
-		INSERT INTO influencers (id, name, email, password, phone, platforms, account_type)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, influencer.ID, influencer.Name, influencer.Email, influencer.Password, influencer.Phone, platformsJson, influencer.AccountType)
-	return err
+	err := r.db.QueryRow(ctx, `
+		INSERT INTO influencers (id, name, email, password, phone, account_type)
+		VALUES ($1, $2, $3, $4, $5, $6) 
+		RETURNING id
+	`, influencer.ID, influencer.Name, influencer.Email, influencer.Password, influencer.Phone, influencer.AccountType).Scan(&id)
+
+	return id, err
 }
 
 func (r *InfluencerRepo) GetByEmail(ctx context.Context, email string) (*influencer.Entity, error) {
 	var influencer influencer.Entity
-	var platformsJson string
 
 	err := r.db.QueryRow(ctx, `
 		SELECT id, name, email, password, phone, platforms, account_type
 		FROM influencers WHERE email = $1
-	`, email).Scan(&influencer.ID, &influencer.Name, &influencer.Email, &influencer.Password, &influencer.Phone, &platformsJson, &influencer.AccountType)
+	`, email).Scan(&influencer.ID, &influencer.Name, &influencer.Email, &influencer.Password, &influencer.Phone, &influencer.Platforms, &influencer.AccountType)
 	if err != nil {
 		return nil, err
 	}
 
-	platforms, err := utils.DeserializePlatforms(platformsJson)
-	if err != nil {
-		return nil, err
-	}
-
-	influencer.Platforms = platforms
 	return &influencer, nil
 }
 
-func (r *InfluencerRepo) Update(ctx context.Context, influencer *influencer.Entity) error {
-	platformsJson, err := utils.SerializePlatforms(influencer.Platforms)
+func (r *InfluencerRepo) GetByID(ctx context.Context, id string) (*influencer.Entity, error) {
+	row := r.db.QueryRow(ctx, `
+		SELECT id, name, email, password, phone, platforms, account_type, created_at, updated_at
+		FROM influencers
+		WHERE id = $1
+	`, id)
+
+	var inf influencer.Entity
+	err := row.Scan(
+		&inf.ID, &inf.Name, &inf.Email, &inf.Password, &inf.Phone, &inf.Platforms, &inf.AccountType, &inf.CreatedAt, &inf.UpdatedAt,
+	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = r.db.Exec(ctx, `
+	return &inf, nil
+}
+
+func (r *InfluencerRepo) GetAll(ctx context.Context) ([]*influencer.Entity, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT id, name, email, password, phone, platforms, account_type, created_at, updated_at
+		FROM influencers
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var influencers []*influencer.Entity
+
+	for rows.Next() {
+		var inf influencer.Entity
+		var platforms []string
+
+		err := rows.Scan(
+			&inf.ID, &inf.Name, &inf.Email, &inf.Password, &inf.Phone, &platforms, &inf.AccountType, &inf.CreatedAt, &inf.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		inf.Platforms = platforms
+		influencers = append(influencers, &inf)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return influencers, nil
+}
+
+func (r *InfluencerRepo) Update(ctx context.Context, influencer *influencer.Entity) error {
+	_, err := r.db.Exec(ctx, `
 		UPDATE influencers SET name = $1, email = $2, password = $3, phone = $4, platforms = $5, account_type = $6, updated_at = $7
 		WHERE id = $8
-	`, influencer.Name, influencer.Email, influencer.Password, influencer.Phone, platformsJson, influencer.AccountType, influencer.UpdatedAt, influencer.ID)
+	`, influencer.Name, influencer.Email, influencer.Password, influencer.Phone, influencer.Platforms, influencer.AccountType, influencer.UpdatedAt)
 	return err
 }
 

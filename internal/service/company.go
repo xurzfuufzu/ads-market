@@ -21,10 +21,10 @@ func NewCompanyService(companyRepo repository.Company) *CompanyService {
 	}
 }
 
-func (s *CompanyService) Register(ctx context.Context, input company.RegisterRequest) (string, error) {
+func (s *CompanyService) Register(ctx context.Context, input company.RegisterRequest) (string, string, error) {
 	existingCompany, err := s.companyRepo.GetByEmail(ctx, input.Email)
 	if err == nil && existingCompany != nil {
-		return "", company.ErrorEmailConflict
+		return "", "", company.ErrorEmailConflict
 	}
 
 	hashedPassword, err := hasher.Hash(input.Password)
@@ -38,33 +38,37 @@ func (s *CompanyService) Register(ctx context.Context, input company.RegisterReq
 		AccountType: "Company",
 	}
 
-	err = s.companyRepo.Create(ctx, company)
+	id, err := s.companyRepo.Create(ctx, company)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	token, err := token.GenerateToken(company.ID.String())
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return token, nil
+	return id, token, nil
 }
 
-func (s *CompanyService) Login(ctx context.Context, input domain.LoginRequest) (string, error) {
+func (s *CompanyService) Login(ctx context.Context, input domain.LoginRequest) (string, string, error) {
 	existingCompany, err := s.companyRepo.GetByEmail(ctx, input.Email)
 	if err != nil {
-		return "", errors.New("company not found")
+		return "", "", errors.New("company not found")
 	}
 
 	if err := hasher.Compare(existingCompany.Password, input.Password); err != nil {
-		return "", errors.New("invalid credentials")
+		return "", "", errors.New("invalid credentials")
 	}
 
 	token, err := token.GenerateToken(existingCompany.ID.String())
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return token, nil
+	return existingCompany.ID.String(), token, nil
+}
+
+func (s *CompanyService) GetByID(ctx context.Context, id string) (*company.Entity, error) {
+	return s.companyRepo.GetByID(ctx, id)
 }

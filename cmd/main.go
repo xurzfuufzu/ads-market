@@ -21,6 +21,10 @@ func main() {
 		log.Println("error to connection to postqresql", err)
 	}
 
+	if err := client.Migrate(db); err != nil {
+		log.Println("migration failed", err)
+	}
+
 	defer db.Close()
 
 	repos := repository.NewRepositories(db)
@@ -30,10 +34,16 @@ func main() {
 	influencerService := service.NewInfluencerService(repos.Influencer)
 	influencerHandler := handler.NewInfluencerHandler(influencerService)
 
+	adResponseService := service.NewAdResponseService(repos.AdResponse)
+	adResponseHandler := handler.NewAdResponseHandler(adResponseService)
+
+	adService := service.NewAdService(repos.Ad)
+	adHandler := handler.NewAdHandler(adService)
+
 	app := fiber.New()
 	app.Use(logger.New())
 
-	routes.InitRoutes(app, companyHandler, influencerHandler)
+	routes.InitRoutes(app, companyHandler, influencerHandler, adHandler, adResponseHandler)
 
 	log.Fatal(app.Listen(":" + cfg.Server.Port))
 }

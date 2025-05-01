@@ -4,6 +4,9 @@ import (
 	"Ads-marketplace/internal/domain/ad"
 	"Ads-marketplace/internal/repository"
 	"context"
+	"fmt"
+	"github.com/google/uuid"
+	"time"
 )
 
 type AdService struct {
@@ -16,13 +19,35 @@ func NewAdService(adRepo repository.Ad) *AdService {
 	}
 }
 
-func (s *AdService) CreateAd(ctx context.Context, ad *ad.Entity) error {
-	ad.Status = "available"
+func (s *AdService) CreateAd(ctx context.Context, adRequest *ad.CreateRequest) error {
+	ad := &ad.Entity{
+		ID:          uuid.New().String(), // Генерируем ID для объявления
+		Title:       adRequest.Title,
+		CompanyName: adRequest.CompanyName,
+		Description: adRequest.Description,
+		PriceFrom:   adRequest.PriceFrom,
+		PriceTo:     adRequest.PriceTo,
+		Status:      "active",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Platforms:   adRequest.Platforms,
+		Category:    adRequest.Category,
+		City:        adRequest.City,
+	}
 
 	err := s.adRepo.Create(ctx, ad)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create ad: %v", err)
 	}
 
 	return nil
+}
+
+func (s *AdService) GetAllAds(ctx context.Context) ([]*ad.Entity, error) {
+	ads, err := s.adRepo.GetAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get ads: %v", err)
+	}
+
+	return ads, nil
 }
