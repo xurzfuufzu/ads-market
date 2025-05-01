@@ -26,8 +26,7 @@ func GetURL(db *config.DB) string {
 				db.Password + "@" +
 				db.Host + ":" +
 				db.Port + "/" +
-				db.Database +
-				"?sslmode=disable"
+				db.Database
 	}
 	return db.URL
 }

@@ -7,37 +7,37 @@ import (
 )
 
 type Config struct {
-	Server Server `env-required:"true" yaml:"server"`
-	DB     DB     `env-required:"true" yaml:"db"`
-	JWT    JWT    `env-required:"true" yaml:"jwt"`
+	Server Server `env-required:"true"`
+	DB     DB     `env-required:"true"`
+	JWT    JWT    `env-required:"true"`
 }
 
 type Server struct {
-	Port string `env-required:"true" yaml:"port"`
+	Port string `env:"PORT" env-required:"true"`
 }
 
 type DB struct {
-	Host     string `env-required:"true" yaml:"host"`
-	Port     string `env-required:"true" yaml:"port"`
-	Username string `env-required:"true" yaml:"username"`
-	Password string `env-required:"true" yaml:"password"`
-	Database string `env-required:"true" yaml:"database"`
-	URL      string `yaml:"-"`
+	Host     string `env:"DB_HOST" env-required:"true"`
+	Port     string `env:"DB_PORT" env-required:"true"`
+	Username string `env:"DB_USER" env-required:"true"`
+	Password string `env:"DB_PASSWORD" env-required:"true"`
+	Database string `env:"DB_NAME" env-required:"true"`
+	URL      string
 }
 
 type JWT struct {
-	SecretKey       string        `env-required:"true" yaml:"sign_key"`
-	TokenTTL        time.Duration `env-required:"true" yaml:"token_ttl"`
-	RefreshTokenTTL time.Duration `env-required:"true" yaml:"refresh_token_ttl"`
+	SecretKey       string        `env:"JWT_SIGN_KEY" env-required:"true"`
+	TokenTTL        time.Duration `env:"JWT_TOKEN_TTL" env-required:"true"`
+	RefreshTokenTTL time.Duration `env:"JWT_REFRESH_TOKEN_TTL" env-required:"true"`
 }
 
 var instance *Config
 
 func NewConfig() *Config {
-	log.Println("Reading application config...")
+	log.Println("Reading application config from environment...")
 
 	instance := &Config{}
-	if err := cleanenv.ReadConfig("config.yaml", instance); err != nil {
+	if err := cleanenv.ReadEnv(instance); err != nil {
 		help, _ := cleanenv.GetDescription(instance, nil)
 		log.Println(help)
 		log.Fatal(err)
