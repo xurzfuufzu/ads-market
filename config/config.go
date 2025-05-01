@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 	"log"
 	"time"
 )
@@ -35,6 +36,10 @@ var instance *Config
 
 func NewConfig() *Config {
 	log.Println("Reading application config from environment...")
+
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: .env file not found or could not be loaded")
+	}
 
 	instance := &Config{}
 	if err := cleanenv.ReadEnv(instance); err != nil {
