@@ -2,6 +2,7 @@ package service
 
 import (
 	"Ads-marketplace/internal/domain"
+	"Ads-marketplace/internal/domain/ad_response"
 	"Ads-marketplace/internal/domain/influencer"
 	"Ads-marketplace/internal/repository"
 	"Ads-marketplace/pkg/hasher"
@@ -84,4 +85,26 @@ func (s *InfluencerService) GetAllInfluencers(ctx context.Context) ([]*influence
 		return nil, fmt.Errorf("failed to get all influencers: %v", err)
 	}
 	return influencers, nil
+}
+
+func (s *InfluencerService) GetAdsResponsesByID(ctx context.Context, influencerID string) ([]*ad_response.AdResponseDTO, error) {
+	return s.influencerRepo.GetAdsResponsesByID(ctx, influencerID)
+}
+
+func (s *InfluencerService) DeleteByID(ctx context.Context, id string) error {
+	err := s.influencerRepo.Delete(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete ad: %v", err)
+	}
+
+	return nil
+}
+
+func (s *InfluencerService) UpdateByID(ctx context.Context, entity *influencer.Entity) error {
+	err := s.influencerRepo.Update(ctx, entity)
+	if err != nil {
+		return fmt.Errorf("failed to update influencer: %v", err)
+	}
+
+	return nil
 }

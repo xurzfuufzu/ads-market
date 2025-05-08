@@ -7,6 +7,7 @@ import (
 	"Ads-marketplace/internal/domain/influencer"
 	"Ads-marketplace/internal/repository/postgresql"
 	"context"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -26,6 +27,8 @@ type Company interface {
 	GetByID(ctx context.Context, id string) (*company.Entity, error)
 	Update(ctx context.Context, company *company.Entity) error
 	Delete(ctx context.Context, id string) error
+	GetCompanyAds(ctx context.Context, companyName string) ([]*ad.Entity, error)
+	GetInfluencersForAd(ctx context.Context, id uuid.UUID) ([]*influencer.InfluencerDTO, error)
 }
 
 type Influencer interface {
@@ -35,10 +38,12 @@ type Influencer interface {
 	GetAll(ctx context.Context) ([]*influencer.Entity, error)
 	Update(ctx context.Context, influencer *influencer.Entity) error
 	Delete(ctx context.Context, id string) error
+	GetAdsResponsesByID(ctx context.Context, id string) ([]*ad_response.AdResponseDTO, error)
 }
 
 type AdResponse interface {
 	Create(ctx context.Context, adResponse *ad_response.CreateRequest) error
+	UpdateStatus(ctx context.Context, dto ad_response.UpdateAdStatusDTO) error
 }
 
 type Repositories struct {

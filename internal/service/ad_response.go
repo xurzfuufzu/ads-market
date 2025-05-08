@@ -24,3 +24,11 @@ func (s *AdResponseService) CreateAdResponse(ctx context.Context, adResponse *ad
 	}
 	return nil
 }
+
+func (s *AdResponseService) UpdateAdResponseStatus(ctx context.Context, dto ad_response.UpdateAdStatusDTO) error {
+	err := s.adResponseRepo.UpdateStatus(ctx, dto)
+	if err != nil {
+		return fmt.Errorf("failed to update ad response status: %v", err)
+	}
+	return nil
+}

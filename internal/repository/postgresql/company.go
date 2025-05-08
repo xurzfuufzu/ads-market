@@ -1,8 +1,12 @@
 package postgresql
 
 import (
+	"Ads-marketplace/internal/domain/ad"
 	"Ads-marketplace/internal/domain/company"
+	"Ads-marketplace/internal/domain/influencer"
 	"context"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -59,15 +63,77 @@ func (r *CompanyRepo) GetByID(ctx context.Context, id string) (*company.Entity, 
 	return &c, nil
 }
 
+func (r *CompanyRepo) GetCompanyAds(ctx context.Context, companyName string) ([]*ad.Entity, error) {
+	query := `
+		SELECT id, title, company_name, description, pricefrom, priceto, category, target_city, platforms, status, created_at, updated_at, responses_count
+		FROM ads
+		WHERE company_name = $1
+	`
+
+	rows, err := r.db.Query(ctx, query, companyName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ads []*ad.Entity
+	for rows.Next() {
+		var a ad.Entity
+		if err := rows.Scan(
+			&a.ID, &a.Title, &a.CompanyName, &a.Description, &a.PriceFrom, &a.PriceTo, &a.Category,
+			&a.City, &a.Platforms, &a.Status, &a.CreatedAt, &a.UpdatedAt, &a.ResponsesCount,
+		); err != nil {
+			return nil, err
+		}
+		ads = append(ads, &a)
+	}
+
+	return ads, nil
+}
+
 func (r *CompanyRepo) Update(ctx context.Context, company *company.Entity) error {
 	_, err := r.db.Exec(ctx, `
-		UPDATE companies SET name = $1, email = $2, password = $3, phone = $4, description = $5, account_type = $6, updated_at = $7
-		WHERE id = $8
-	`, company.Name, company.Email, company.Password, company.Phone, company.Description, company.AccountType, company.UpdatedAt, company.ID)
+		UPDATE companies
+		SET name = $1, email = $2, phone = $3, description = $4, updated_at = NOW()
+		WHERE id = $5
+	`, company.Name, company.Email, company.Phone, company.Description, company.ID)
 	return err
 }
 
 func (r *CompanyRepo) Delete(ctx context.Context, id string) error {
 	_, err := r.db.Exec(ctx, `DELETE FROM companies WHERE id = $1`, id)
 	return err
+}
+
+func (r *CompanyRepo) GetInfluencersForAd(ctx context.Context, id uuid.UUID) ([]*influencer.InfluencerDTO, error) {
+	query := `
+		SELECT
+    		i.id, i.name,i.platforms,i.category,i.city,ar.status
+			FROM ad_responses ar
+         	JOIN ads a ON ar.ad_id = a.id
+         	JOIN influencers i ON ar.influencer_id = i.id
+			WHERE a.id = $1
+	`
+
+	fmt.Println(id)
+
+	rows, err := r.db.Query(ctx, query, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch influencers for ad: %v", err)
+	}
+	defer rows.Close()
+
+	var results []*influencer.InfluencerDTO
+	for rows.Next() {
+		var item influencer.InfluencerDTO
+		if err := rows.Scan(
+			&item.ID, &item.Name, &item.Category, &item.Platforms,
+			&item.City, &item.Status,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan influencer data: %v", err)
+		}
+		results = append(results, &item)
+	}
+
+	return results, nil
 }

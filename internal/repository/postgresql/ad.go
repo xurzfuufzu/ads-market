@@ -66,8 +66,8 @@ func (r *AdRepo) Update(ctx context.Context, ad *ad.Entity) error {
 }
 
 func (r *AdRepo) Delete(ctx context.Context, id string) error {
-	//TODO implement me
-	panic("implement me")
+	_, err := r.db.Exec(ctx, `DELETE FROM ads WHERE id = $1`, id)
+	return err
 }
 
 func (r *AdRepo) GetByInfluencerID(ctx context.Context, influencerID string) ([]*ad.Entity, error) {

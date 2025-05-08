@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS ad_responses
     status        TEXT        DEFAULT 'pending', -- pending / accepted / rejected
     created_at    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (ad_id) REFERENCES ads (id),
-    FOREIGN KEY (influencer_id) REFERENCES influencers (id),
+    FOREIGN KEY (ad_id) REFERENCES ads (id) ON DELETE CASCADE,
+    FOREIGN KEY (influencer_id) REFERENCES influencers (id) ON DELETE CASCADE,
     UNIQUE (ad_id, influencer_id)
 );
 

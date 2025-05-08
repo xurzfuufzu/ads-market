@@ -22,3 +22,12 @@ type RegisterRequest struct {
 	PhoneNumber string `json:"phone_number"`
 	Category    string `json:"category"`
 }
+
+type InfluencerDTO struct {
+	ID        string
+	Name      *string
+	Platforms *[]string
+	Category  *[]string
+	City      *string
+	Status    *string
+}

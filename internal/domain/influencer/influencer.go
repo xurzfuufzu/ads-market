@@ -12,6 +12,8 @@ type Entity struct {
 	Password    string
 	Phone       string
 	Platforms   []string
+	Category    []string
+	City        *string
 	AccountType string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

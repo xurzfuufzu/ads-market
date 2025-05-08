@@ -1,6 +1,7 @@
 package postgresql
 
 import (
+	"Ads-marketplace/internal/domain/ad_response"
 	"Ads-marketplace/internal/domain/influencer"
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -95,13 +96,44 @@ func (r *InfluencerRepo) GetAll(ctx context.Context) ([]*influencer.Entity, erro
 
 func (r *InfluencerRepo) Update(ctx context.Context, influencer *influencer.Entity) error {
 	_, err := r.db.Exec(ctx, `
-		UPDATE influencers SET name = $1, email = $2, password = $3, phone = $4, platforms = $5, account_type = $6, updated_at = $7
-		WHERE id = $8
-	`, influencer.Name, influencer.Email, influencer.Password, influencer.Phone, influencer.Platforms, influencer.AccountType, influencer.UpdatedAt)
+		UPDATE influencers
+		SET name = $1, email = $2, phone = $3, platforms = $4, category = $5, city = $6, updated_at = NOW()
+		WHERE id = $7
+	`, influencer.Name, influencer.Email, influencer.Phone, influencer.Platforms, influencer.Category, influencer.City, influencer.ID)
 	return err
 }
 
 func (r *InfluencerRepo) Delete(ctx context.Context, id string) error {
 	_, err := r.db.Exec(ctx, `DELETE FROM influencers WHERE id = $1`, id)
 	return err
+}
+
+func (r *InfluencerRepo) GetAdsResponsesByID(ctx context.Context, influencerID string) ([]*ad_response.AdResponseDTO, error) {
+	query := `
+		SELECT 
+			a.id, a.title, a.company_name,
+			ar.id, ar.status
+		FROM ad_responses ar
+		JOIN ads a ON ar.ad_id = a.id
+		WHERE ar.influencer_id = $1
+	`
+
+	rows, err := r.db.Query(ctx, query, influencerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []*ad_response.AdResponseDTO
+	for rows.Next() {
+		var item ad_response.AdResponseDTO
+		if err := rows.Scan(
+			&item.AdsID, &item.Title, &item.CompanyName, &item.ID, &item.Status,
+		); err != nil {
+			return nil, err
+		}
+		results = append(results, &item)
+	}
+
+	return results, nil
 }

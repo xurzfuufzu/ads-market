@@ -13,6 +13,15 @@ import (
 	"log"
 )
 
+// @title Marketplace
+// @version 1.0
+// @description API Server for Marketplace for influences and companies
+// @BasePath /api
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description JWT token
 func main() {
 	cfg := config.NewConfig()
 

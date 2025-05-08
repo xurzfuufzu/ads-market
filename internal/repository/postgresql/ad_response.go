@@ -37,3 +37,22 @@ func (r *AdResponseRepo) Create(ctx context.Context, adResponse *ad_response.Cre
 
 	return nil
 }
+
+func (r *AdResponseRepo) UpdateStatus(ctx context.Context, dto ad_response.UpdateAdStatusDTO) error {
+	res, err := r.db.Exec(ctx, `
+		UPDATE ad_responses
+		SET status = $1
+		WHERE id = $2
+	`, dto.Status, dto.ID)
+
+	if err != nil {
+		return fmt.Errorf("failed to update ad response status: %v", err)
+	}
+
+	rows := res.RowsAffected()
+	if rows == 0 {
+		fmt.Printf("No row found with id: %s\n", dto.ID)
+	}
+
+	return nil
+}

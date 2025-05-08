@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS ads
     target_city   TEXT,
     responses_count INTEGER DEFAULT 0,
 
-    FOREIGN KEY (company_name) REFERENCES companies (name)
+    FOREIGN KEY (company_name) REFERENCES companies (name) on DELETE CASCADE
 );
 -- +goose StatementEnd
 

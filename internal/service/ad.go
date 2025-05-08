@@ -51,3 +51,12 @@ func (s *AdService) GetAllAds(ctx context.Context) ([]*ad.Entity, error) {
 
 	return ads, nil
 }
+
+func (s *AdService) DeleteAdByID(ctx context.Context, id string) error {
+	err := s.adRepo.Delete(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete ad: %v", err)
+	}
+
+	return nil
+}

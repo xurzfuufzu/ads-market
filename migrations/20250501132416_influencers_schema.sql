@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS influencers
     password     VARCHAR(255)        NOT NULL,
     phone        VARCHAR(20),
     platforms    TEXT[],
+    category     TEXT[],
     city         VARCHAR(50),
     account_type VARCHAR(50)         NOT NULL,
     created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
