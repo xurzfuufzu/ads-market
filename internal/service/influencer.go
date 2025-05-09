@@ -40,6 +40,7 @@ func (s *InfluencerService) Register(ctx context.Context, input influencer.Regis
 		Email:       input.Email,
 		Password:    hashedPassword,
 		Phone:       input.PhoneNumber,
+		Platforms:   input.Platforms,
 		AccountType: "Influencer",
 	}
 
