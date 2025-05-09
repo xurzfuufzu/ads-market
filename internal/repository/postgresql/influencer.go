@@ -21,10 +21,10 @@ func (r *InfluencerRepo) Create(ctx context.Context, influencer *influencer.Enti
 	var id string
 
 	err := r.db.QueryRow(ctx, `
-		INSERT INTO influencers (id, name, email, password, phone, account_type)
-		VALUES ($1, $2, $3, $4, $5, $6) 
+		INSERT INTO influencers (id, name, email, password, phone, account_type, platforms)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id
-	`, influencer.ID, influencer.Name, influencer.Email, influencer.Password, influencer.Phone, influencer.AccountType).Scan(&id)
+	`, influencer.ID, influencer.Name, influencer.Email, influencer.Password, influencer.Phone, influencer.AccountType, influencer.Platforms).Scan(&id)
 
 	return id, err
 }
