@@ -153,6 +153,10 @@ func (h *InfluencerHandler) GetAdsResponsesByID(c fiber.Ctx) error {
 		})
 	}
 
+	if responses == nil {
+		return c.JSON([]any{})
+	}
+
 	return c.JSON(responses)
 }
 
