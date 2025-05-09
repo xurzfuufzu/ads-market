@@ -6,13 +6,13 @@ import (
 )
 
 type Entity struct {
-	ID          uuid.UUID
-	Name        string
-	Email       string
-	Password    string
-	Phone       string
-	Description *string
-	AccountType string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID          uuid.UUID  `json:"id"`
+	Name        string     `json:"name"`
+	Email       string     `json:"email"`
+	Password    string     `json:"password"`
+	Phone       string     `json:"phone"`
+	Description *string    `json:"description,omitempty"`
+	AccountType string     `json:"account_type"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 }
