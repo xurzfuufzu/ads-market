@@ -110,3 +110,19 @@ func (h *AdHandler) UpdateByID(c fiber.Ctx) error {
 	}
 	return c.Status(http.StatusOK).JSON(fiber.Map{})
 }
+
+func (h *AdHandler) GetByID(c fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID is required",
+		})
+	}
+	ad, err := h.adService.GetAdByID(c.Context(), id)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(ad)
+}

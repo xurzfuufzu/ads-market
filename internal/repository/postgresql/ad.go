@@ -56,8 +56,47 @@ func (r *AdRepo) GetAll(ctx context.Context) ([]*ad.Entity, error) {
 }
 
 func (r *AdRepo) GetByID(ctx context.Context, id string) (*ad.Entity, error) {
-	//TODO implement me
-	panic("implement me")
+	query := `
+		SELECT 
+			id, 
+			title, 
+			company_name, 
+			description, 
+			pricefrom, 
+			priceto, 
+			status, 
+			created_at, 
+			updated_at, 
+			platforms, 
+			category, 
+			target_city, 
+			responses_count
+		FROM ads
+		WHERE id = $1
+	`
+
+	var ad ad.Entity
+
+	err := r.db.QueryRow(ctx, query, id).Scan(
+		&ad.ID,
+		&ad.Title,
+		&ad.CompanyName,
+		&ad.Description,
+		&ad.PriceFrom,
+		&ad.PriceTo,
+		&ad.Status,
+		&ad.CreatedAt,
+		&ad.UpdatedAt,
+		&ad.Platforms,
+		&ad.Category,
+		&ad.City,
+		&ad.ResponsesCount,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ad, nil
 }
 
 func (r *AdRepo) Update(ctx context.Context, ad *ad.Entity) error {

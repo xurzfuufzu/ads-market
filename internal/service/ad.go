@@ -22,7 +22,7 @@ func NewAdService(adRepo repository.Ad) *AdService {
 
 func (s *AdService) CreateAd(ctx context.Context, adRequest *ad.CreateRequest) error {
 	ad := &ad.Entity{
-		ID:          uuid.New().String(), // Генерируем ID для объявления
+		ID:          uuid.New().String(),
 		Title:       adRequest.Title,
 		CompanyName: adRequest.CompanyName,
 		Description: adRequest.Description,
@@ -68,4 +68,17 @@ func (s *AdService) Update(ctx context.Context, ad *ad.Entity) error {
 	}
 
 	return s.adRepo.Update(ctx, ad)
+}
+
+func (s *AdService) GetAdByID(ctx context.Context, id string) (*ad.Entity, error) {
+	ad, err := s.adRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get ad by ID: %v", err)
+	}
+
+	if ad == nil {
+		return nil, errors.New("ad not found")
+	}
+
+	return ad, nil
 }

@@ -35,6 +35,7 @@ func InitRoutes(
 	ad.Get("/all", AuthMiddleware, adHandler.GetAllAds)
 	ad.Delete("/:id", AuthMiddleware, adHandler.DeleteByID)
 	ad.Put("/update", AuthMiddleware, adHandler.UpdateByID)
+	ad.Get("/:id", AuthMiddleware, adHandler.GetByID)
 
 	adResponse := app.Group("/ad-response")
 	adResponse.Post("/create", AuthMiddleware, adResponseHandler.CreateAdResponse)
