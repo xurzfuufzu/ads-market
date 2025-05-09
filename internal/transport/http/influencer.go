@@ -6,6 +6,7 @@ import (
 	"Ads-marketplace/internal/service"
 	"encoding/json"
 	"github.com/gofiber/fiber/v3"
+	"log"
 	"net/http"
 )
 
@@ -198,6 +199,9 @@ func (h *InfluencerHandler) Update(c fiber.Ctx) error {
 			"error": "Invalid request",
 		})
 	}
+
+	log.Println("input", influencer)
+
 	err := h.influencerService.UpdateByID(c.Context(), &influencer)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{

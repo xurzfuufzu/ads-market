@@ -17,7 +17,7 @@ var validStatuses = map[string]struct{}{
 }
 
 type Entity struct {
-	ID             string
+	ID             string  `json:"ID"`
 	Title          string  `json:"title"`
 	CompanyName    string  `json:"company_name"`
 	Description    *string `json:"description"`

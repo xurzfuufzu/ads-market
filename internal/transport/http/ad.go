@@ -93,3 +93,20 @@ func (h *AdHandler) DeleteByID(c fiber.Ctx) error {
 	}
 	return c.Status(http.StatusOK).JSON(fiber.Map{})
 }
+
+func (h *AdHandler) UpdateByID(c fiber.Ctx) error {
+	var ad ad.Entity
+	if err := json.Unmarshal(c.Body(), &ad); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request",
+		})
+	}
+
+	err := h.adService.Update(c.Context(), &ad)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(http.StatusOK).JSON(fiber.Map{})
+}

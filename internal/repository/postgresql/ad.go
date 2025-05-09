@@ -61,8 +61,14 @@ func (r *AdRepo) GetByID(ctx context.Context, id string) (*ad.Entity, error) {
 }
 
 func (r *AdRepo) Update(ctx context.Context, ad *ad.Entity) error {
-	//TODO implement me
-	panic("implement me")
+	_, err := r.db.Exec(ctx, `
+		UPDATE ads
+		SET title = $1, company_name = $2, description = $3, pricefrom = $4, priceto = $5, 
+		    status = $6, platforms = $7, category = $8,target_city = $9,updated_at = NOW()
+		WHERE id = $10
+	`, ad.Title, ad.CompanyName, ad.Description, ad.PriceFrom, ad.PriceTo, ad.Status, ad.Platforms, ad.Category, ad.City, ad.ID)
+
+	return err
 }
 
 func (r *AdRepo) Delete(ctx context.Context, id string) error {

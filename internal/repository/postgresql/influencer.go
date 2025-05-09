@@ -33,9 +33,9 @@ func (r *InfluencerRepo) GetByEmail(ctx context.Context, email string) (*influen
 	var influencer influencer.Entity
 
 	err := r.db.QueryRow(ctx, `
-		SELECT id, name, email, password, phone, platforms, account_type
+		SELECT id, name, email, password, phone, platforms, category, account_type
 		FROM influencers WHERE email = $1
-	`, email).Scan(&influencer.ID, &influencer.Name, &influencer.Email, &influencer.Password, &influencer.Phone, &influencer.Platforms, &influencer.AccountType)
+	`, email).Scan(&influencer.ID, &influencer.Name, &influencer.Email, &influencer.Password, &influencer.Phone, &influencer.Platforms, &influencer.Category, &influencer.AccountType)
 	if err != nil {
 		return nil, err
 	}
@@ -45,14 +45,14 @@ func (r *InfluencerRepo) GetByEmail(ctx context.Context, email string) (*influen
 
 func (r *InfluencerRepo) GetByID(ctx context.Context, id string) (*influencer.Entity, error) {
 	row := r.db.QueryRow(ctx, `
-		SELECT id, name, email, password, phone, platforms, account_type, created_at, updated_at
+		SELECT id, name, email, password, phone, platforms, category, account_type, created_at, updated_at
 		FROM influencers
 		WHERE id = $1
 	`, id)
 
 	var inf influencer.Entity
 	err := row.Scan(
-		&inf.ID, &inf.Name, &inf.Email, &inf.Password, &inf.Phone, &inf.Platforms, &inf.AccountType, &inf.CreatedAt, &inf.UpdatedAt,
+		&inf.ID, &inf.Name, &inf.Email, &inf.Password, &inf.Phone, &inf.Platforms, &inf.Category, &inf.AccountType, &inf.CreatedAt, &inf.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (r *InfluencerRepo) GetByID(ctx context.Context, id string) (*influencer.En
 
 func (r *InfluencerRepo) GetAll(ctx context.Context) ([]*influencer.Entity, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, name, email, password, phone, platforms, account_type, created_at, updated_at
+		SELECT id, name, email, password, phone, platforms, category, account_type, created_at, updated_at
 		FROM influencers
 	`)
 	if err != nil {
@@ -78,7 +78,7 @@ func (r *InfluencerRepo) GetAll(ctx context.Context) ([]*influencer.Entity, erro
 		var platforms []string
 
 		err := rows.Scan(
-			&inf.ID, &inf.Name, &inf.Email, &inf.Password, &inf.Phone, &platforms, &inf.AccountType, &inf.CreatedAt, &inf.UpdatedAt,
+			&inf.ID, &inf.Name, &inf.Email, &inf.Password, &inf.Phone, &platforms, &inf.Category, &inf.AccountType, &inf.CreatedAt, &inf.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err

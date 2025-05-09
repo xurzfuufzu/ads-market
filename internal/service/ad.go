@@ -4,6 +4,7 @@ import (
 	"Ads-marketplace/internal/domain/ad"
 	"Ads-marketplace/internal/repository"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"time"
@@ -59,4 +60,12 @@ func (s *AdService) DeleteAdByID(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (s *AdService) Update(ctx context.Context, ad *ad.Entity) error {
+	if ad.ID == "" {
+		return errors.New("ad ID is required")
+	}
+
+	return s.adRepo.Update(ctx, ad)
 }
