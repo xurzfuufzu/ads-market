@@ -16,12 +16,14 @@ var (
 )
 
 type RegisterRequest struct {
-	Name        string `json:"name"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	PhoneNumber string `json:"phone_number"`
-	Category    string `json:"category"`
+	Name        string   `json:"name"`
+	Email       string   `json:"email"`
+	Password    string   `json:"password"`
+	PhoneNumber string   `json:"phone_number"`
+	Category    string   `json:"category"`
+	Platforms   []string `json:"platforms"`
 }
+
 
 type InfluencerDTO struct {
 	ID        string
